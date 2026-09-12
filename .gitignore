@@ -26,3 +26,7 @@ npm-debug.log*
 *.sw?
 
 *.local
+
+# Local tooling state (not part of the deployed config)
+.claude/
+.railway/
