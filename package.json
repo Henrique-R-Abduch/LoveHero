@@ -10,6 +10,10 @@
     "dev:web": "npm run dev --workspace apps/web",
     "dev:server": "npm run dev --workspace apps/server",
     "build": "npm run build --workspaces --if-present",
+    "start": "node apps/server/dist/server.js",
     "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "railway": "^3.11.0"
   }
 }
