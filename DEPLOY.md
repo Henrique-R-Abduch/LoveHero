@@ -3,7 +3,7 @@
 Estado atual: **ambos já deployados e testados de ponta a ponta** nesta conversa.
 
 - Backend: https://server-production-629b.up.railway.app
-- Frontend: https://syncroom-henriques-projects-f9e5726a.vercel.app (confirmar URL final depois do primeiro build via Git — pode variar)
+- Frontend: https://syncroom-two.vercel.app (o domínio `syncroom-henriques-projects-f9e5726a.vercel.app` também existe mas fica atrás do Vercel SSO/Deployment Protection por padrão — use o `-two`)
 - Repositório: https://github.com/Henrique-R-Abduch/LoveHero (branch `main`)
 
 ## 1. Railway (`apps/server`)
@@ -71,13 +71,18 @@ O pedido menciona "conferir o redator de log configurado anteriormente" — isso
   **⚠ correção**: o pedido original citava `VITE_WS_URL=wss://...`. O código (`apps/web/src/lib/config.ts`) usa uma única base URL para tudo — REST (`POST /rooms`, `GET /config`, upload de foto) e WebSocket (`wsUrlFor` já troca `https→wss` internamente) — porque os dois vivem no mesmo domínio Railway.
 
 - Plano confirmado: escopo `henriques-projects-f9e5726a`, o mesmo já usado por vários outros projetos pessoais existentes na conta — nenhum time novo/pago foi criado.
-- Depois do primeiro build via Git, confirmar a URL final de produção e preencher `CORS_ORIGIN` no Railway com ela.
+- `CORS_ORIGIN` no Railway preenchido com `https://syncroom-two.vercel.app`.
+
+### Duas pegadinhas extras que apareceram só em produção
+
+- **`@syncroom/shared` precisa estar em `dependencies` de *todo* workspace que o importa**, não só de quem "parece" precisar. `apps/web/package.json` nunca declarou essa dependência — funcionava local só por acidente (um `npm install` na raiz linka todos os workspaces no `node_modules` raiz, e a resolução de módulo do Node sobe diretórios até achar, então funciona não importa quem declarou o quê). O instalador da Vercel é corretamente escopado por dependências declaradas, então sem a entrada em `dependencies` o build falhava com `Cannot find module '@syncroom/shared'` — e isso ainda gerava um segundo erro (`TS7006`) parecendo não relacionado, porque um import quebrado vira `any` e cascateia. Corrigido adicionando `"@syncroom/shared": "*"` no `apps/web/package.json`.
+- **SPA routing**: acessar `/r/:roomId` direto (ou dar refresh) devolvia 404 — Vercel serve arquivos estáticos e não sabe que isso é uma rota do React Router. Corrigido com um rewrite catch-all em `apps/web/vercel.json`.
 
 ## 3. Validação pós-deploy
 
-- [x] Backend: `/health`, `/config`, `POST /rooms` (Redis), `wss://` — todos confirmados via curl/script nesta conversa.
-- [x] Log redaction confirmada nos logs reais do Railway.
-- [ ] Frontend: abrir a URL da Vercel em duas abas, criar sala, colar o link, confirmar WS conecta, sync (condutor/seguidor) funciona, chat funciona, upload de foto **não aparece**. Fica pendente até o primeiro build via Git terminar e o `CORS_ORIGIN` ser preenchido com a URL final.
+- [x] Backend: `/health`, `/config`, `POST /rooms` (Redis), `wss://` — confirmados via curl/script.
+- [x] Log redaction confirmada nos logs reais do Railway (`url` sem query string).
+- [x] Frontend em produção (https://syncroom-two.vercel.app), duas abas reais: sala criada, link colado na segunda aba carrega a sala (não 404), WS conecta nos dois lados, sync (idle + handoff de controle) sincronizado, chat relay confirmado, upload de foto **não aparece** na UI.
 
 ## 4. Fora de escopo por ora
 
