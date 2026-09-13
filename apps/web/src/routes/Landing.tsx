@@ -25,42 +25,47 @@ export function Landing() {
       style={{
         minHeight: "100vh",
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 16,
         padding: 16,
-        background: "#0b0b12",
-        color: "#f2f0f7",
-        textAlign: "center",
+        background: "var(--color-bg)",
       }}
     >
-      <h1 style={{ fontSize: "1.6rem" }}>SyncRoom</h1>
-      <p style={{ maxWidth: 360, opacity: 0.8, fontSize: "0.95rem" }}>
-        Crie uma sala privada, compartilhe o link com a outra pessoa e fiquem sincronizados em tempo real. Sem
-        cadastro, sem histórico — a sala expira sozinha.
-      </p>
-      <button
-        onClick={handleCreate}
-        disabled={loading}
+      <div
         style={{
-          padding: "12px 22px",
-          borderRadius: 10,
-          border: "none",
-          background: "#c9a4ff",
-          color: "#0b0b12",
-          fontWeight: 600,
-          fontSize: "1rem",
-          cursor: loading ? "default" : "pointer",
-          opacity: loading ? 0.7 : 1,
+          width: "100%",
+          maxWidth: 380,
+          background: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
+          borderRadius: 20,
+          padding: "40px 32px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 16,
+          textAlign: "center",
         }}
       >
-        {loading ? "Criando..." : "Criar sala"}
-      </button>
-      {error && <span style={{ color: "#ff9b9b", fontSize: "0.85rem" }}>{error}</span>}
-      <a href="/terms" style={{ color: "#8a8798", fontSize: "0.8rem" }}>
-        Termos de uso
-      </a>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--color-text)", margin: 0 }}>
+          Criar uma sala privada
+        </h1>
+        <p style={{ maxWidth: 300, color: "var(--color-text-secondary)", fontSize: "0.9rem", lineHeight: 1.5, margin: 0 }}>
+          Compartilhe o link com a outra pessoa e fiquem sincronizados em tempo real. Sem cadastro — a sala expira
+          sozinha.
+        </p>
+        <button
+          className="btn-primary"
+          onClick={handleCreate}
+          disabled={loading}
+          style={{ width: "100%", fontSize: "1rem", opacity: loading ? 0.7 : 1 }}
+        >
+          {loading ? "Criando..." : "Criar sala"}
+        </button>
+        {error && <span style={{ color: "var(--color-accent)", fontSize: "0.85rem" }}>{error}</span>}
+        <a href="/terms" style={{ color: "var(--color-text-secondary)", fontSize: "0.8rem" }}>
+          Termos de uso
+        </a>
+      </div>
     </div>
   );
 }

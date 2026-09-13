@@ -1,0 +1,15 @@
+:root {
+  --color-bg: #0a0a0a;
+  --color-accent: #ff3b30;
+  --color-accent-active: #b0202b;
+  --color-text-secondary: #8e8e93;
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+
+  /* Everything below is derived from the tokens above (color-mix), never a
+     separately-invented near-black gray. */
+  --color-text: #ffffff;
+  --color-surface: color-mix(in srgb, #ffffff 6%, var(--color-bg));
+  --color-surface-raised: color-mix(in srgb, #ffffff 10%, var(--color-bg));
+  --color-border: color-mix(in srgb, #ffffff 14%, var(--color-bg));
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 16%, transparent);
+}

@@ -68,21 +68,28 @@ export function PhotoUpload({
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%", maxWidth: 360 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
       {incoming && objectUrl && (
-        <div style={{ background: "#161320", borderRadius: 12, padding: 10 }}>
+        <div style={{ background: "var(--color-surface-raised)", borderRadius: 12, padding: 10 }}>
           <img src={objectUrl} alt="Foto recebida" style={{ width: "100%", borderRadius: 8, display: "block" }} />
-          <button
-            onClick={handleViewed}
-            style={{ marginTop: 8, width: "100%", padding: "8px 0", borderRadius: 8, border: "none", background: "#c9a4ff", cursor: "pointer" }}
-          >
+          <button onClick={handleViewed} className="btn-primary" style={{ marginTop: 8, width: "100%" }}>
             Fechar (a foto será apagada)
           </button>
         </div>
       )}
 
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleSelect} disabled={sending} style={{ fontSize: "0.8rem" }} />
-      {error && <span style={{ color: "#ff9b9b", fontSize: "0.8rem" }}>{error}</span>}
+      <label className="btn-quiet" style={{ textAlign: "center", opacity: sending ? 0.6 : 1 }}>
+        {sending ? "Enviando..." : "Enviar foto"}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleSelect}
+          disabled={sending}
+          style={{ display: "none" }}
+        />
+      </label>
+      {error && <span style={{ color: "var(--color-accent)", fontSize: "0.8rem" }}>{error}</span>}
     </div>
   );
 }

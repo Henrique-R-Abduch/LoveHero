@@ -1,6 +1,6 @@
 export function Terms() {
   return (
-    <div style={{ minHeight: "100vh", background: "#0b0b12", color: "#f2f0f7", padding: "32px 20px" }}>
+    <div style={{ minHeight: "100vh", background: "var(--color-bg)", color: "var(--color-text)", padding: "32px 20px" }}>
       <div style={{ maxWidth: 640, margin: "0 auto", lineHeight: 1.6, fontSize: "0.9rem" }}>
         <h1 style={{ fontSize: "1.3rem" }}>Termos de Uso</h1>
 
@@ -44,7 +44,7 @@ export function Terms() {
           participantes, exceto conforme exigido pelas leis aplicáveis.
         </p>
 
-        <p style={{ marginTop: 28, opacity: 0.6, fontSize: "0.8rem" }}>
+        <p style={{ marginTop: 28, color: "var(--color-text-secondary)", fontSize: "0.8rem" }}>
           Documento de referência para o MVP — deve ser revisado por um profissional jurídico antes do lançamento
           público.
         </p>

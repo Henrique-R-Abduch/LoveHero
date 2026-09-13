@@ -37,7 +37,7 @@ export function AgeGate({ children }: { children: ReactNode }) {
           .
         </p>
         <div style={styles.actions}>
-          <button style={styles.confirmButton} onClick={confirm}>
+          <button className="btn-primary" onClick={confirm}>
             Tenho 18 anos ou mais — entrar
           </button>
           <a href="https://www.google.com" style={styles.leaveButton}>
@@ -53,8 +53,9 @@ const styles: Record<string, React.CSSProperties> = {
   overlay: {
     position: "fixed",
     inset: 0,
-    background: "#0b0b12",
-    color: "#f2f0f7",
+    background: "var(--color-bg)",
+    color: "var(--color-text)",
+    fontFamily: "var(--font-family)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -62,18 +63,9 @@ const styles: Record<string, React.CSSProperties> = {
     zIndex: 1000,
   },
   card: { maxWidth: 480, textAlign: "center" },
-  title: { fontSize: "1.4rem", marginBottom: 12 },
-  text: { fontSize: "0.95rem", lineHeight: 1.5, opacity: 0.85 },
-  link: { color: "#c9a4ff" },
+  title: { fontSize: "1.4rem", marginBottom: 12, fontWeight: 600 },
+  text: { fontSize: "0.95rem", lineHeight: 1.5, color: "var(--color-text-secondary)" },
+  link: { color: "var(--color-accent)" },
   actions: { marginTop: 24, display: "flex", flexDirection: "column", gap: 10 },
-  confirmButton: {
-    padding: "12px 20px",
-    borderRadius: 8,
-    border: "none",
-    background: "#c9a4ff",
-    color: "#0b0b12",
-    fontWeight: 600,
-    cursor: "pointer",
-  },
-  leaveButton: { color: "#8a8798", fontSize: "0.85rem" },
+  leaveButton: { color: "var(--color-text-secondary)", fontSize: "0.85rem" },
 };

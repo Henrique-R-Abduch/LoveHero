@@ -21,14 +21,12 @@ export function ChatPanel({
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%", maxWidth: 360 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", height: "100%" }}>
       <div
         style={{
-          height: 180,
+          flex: 1,
+          minHeight: 0,
           overflowY: "auto",
-          background: "#161320",
-          borderRadius: 12,
-          padding: 10,
           display: "flex",
           flexDirection: "column",
           gap: 6,
@@ -39,8 +37,8 @@ export function ChatPanel({
             key={m.id}
             style={{
               alignSelf: m.from === myRole ? "flex-end" : "flex-start",
-              background: m.from === myRole ? "#c9a4ff" : "#2a2438",
-              color: m.from === myRole ? "#0b0b12" : "#f2f0f7",
+              background: m.from === myRole ? "var(--color-accent)" : "var(--color-surface-raised)",
+              color: "var(--color-text)",
               borderRadius: 10,
               padding: "6px 10px",
               maxWidth: "80%",
@@ -58,9 +56,16 @@ export function ChatPanel({
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Mensagem..."
           maxLength={2000}
-          style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid #332b47", background: "#0b0b12", color: "#f2f0f7" }}
+          style={{
+            flex: 1,
+            padding: "8px 10px",
+            borderRadius: 8,
+            border: "1px solid var(--color-border)",
+            background: "var(--color-bg)",
+            color: "var(--color-text)",
+          }}
         />
-        <button type="submit" style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: "#c9a4ff", cursor: "pointer" }}>
+        <button type="submit" className="btn-primary" style={{ padding: "8px 14px" }}>
           Enviar
         </button>
       </form>

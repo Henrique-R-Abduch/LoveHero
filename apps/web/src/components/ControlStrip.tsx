@@ -57,7 +57,7 @@ export function ControlStrip({
   const stopDragging = () => setDragging(false);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
       <div
         ref={stripRef}
         onPointerDown={handlePointerDown}
@@ -66,44 +66,55 @@ export function ControlStrip({
         onPointerCancel={stopDragging}
         style={{
           position: "relative",
-          width: 56,
-          height: 220,
-          borderRadius: 14,
-          background: "#161320",
+          width: 22,
+          height: 200,
+          borderRadius: 11,
+          background: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
           touchAction: "none",
           cursor: isHolder ? "grab" : "default",
-          opacity: isHolder ? 1 : 0.45,
+          opacity: isHolder ? 1 : 0.5,
+          overflow: "hidden",
         }}
       >
         <div
           style={{
             position: "absolute",
-            left: 6,
-            right: 6,
-            bottom: `calc(${displayValue * 100}% - 14px)`,
-            height: 28,
-            borderRadius: 8,
-            background: "#c9a4ff",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: `${displayValue * 100}%`,
+            background: "var(--color-accent-soft)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: 3,
+            right: 3,
+            bottom: `calc(${displayValue * 100}% - 4px)`,
+            height: 8,
+            borderRadius: 4,
+            background: "var(--color-accent)",
           }}
         />
       </div>
 
-      <span style={{ fontSize: "0.8rem", opacity: 0.85, textAlign: "center", maxWidth: 220 }}>{statusLabel}</span>
+      <span
+        style={{
+          fontSize: "0.72rem",
+          color: "var(--color-text-secondary)",
+          textAlign: "center",
+          maxWidth: 96,
+          lineHeight: 1.3,
+        }}
+      >
+        {statusLabel}
+      </span>
 
       {showClaimButton && (
-        <button
-          onClick={onClaim}
-          style={{
-            padding: "6px 14px",
-            borderRadius: 8,
-            border: "1px solid #c9a4ff",
-            background: "transparent",
-            color: "#c9a4ff",
-            cursor: "pointer",
-            fontSize: "0.85rem",
-          }}
-        >
-          Assumir controle
+        <button onClick={onClaim} className="btn-quiet" style={{ fontSize: "0.72rem", padding: "5px 10px" }}>
+          Assumir
         </button>
       )}
     </div>

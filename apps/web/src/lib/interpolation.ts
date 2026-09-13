@@ -20,16 +20,19 @@ export class TickInterpolator {
     this.current = tick;
   }
 
-  /** Returns the interpolated position (0-1) to render right now. */
-  sample(now: number = Date.now()): { x: number; pattern: string } | null {
+  /** Returns the interpolated position (0-1) and speed to render right now. */
+  sample(now: number = Date.now()): { x: number; speed: number; pattern: string } | null {
     if (!this.current) return null;
-    if (!this.previous) return { x: this.current.x, pattern: this.current.pattern };
+    if (!this.previous) {
+      return { x: this.current.x, speed: this.current.speed, pattern: this.current.pattern };
+    }
 
     const renderTime = now - this.renderDelayMs;
     const span = this.current.t - this.previous.t || 1;
     const alpha = clamp((renderTime - this.previous.t) / span, 0, 1);
     const x = this.previous.x + (this.current.x - this.previous.x) * alpha;
-    return { x, pattern: this.current.pattern };
+    const speed = this.previous.speed + (this.current.speed - this.previous.speed) * alpha;
+    return { x, speed, pattern: this.current.pattern };
   }
 }
 

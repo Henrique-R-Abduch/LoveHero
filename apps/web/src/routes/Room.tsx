@@ -6,8 +6,7 @@ import { TickInterpolator } from "../lib/interpolation";
 import { getParticipantId } from "../lib/participant";
 import { getConfig } from "../lib/api";
 import { SyncCanvas } from "../components/SyncCanvas";
-import { ChatPanel } from "../components/ChatPanel";
-import { PhotoUpload } from "../components/PhotoUpload";
+import { ChatDrawer } from "../components/ChatDrawer";
 import { ReportEndButton } from "../components/ReportEndButton";
 import { ControlStrip } from "../components/ControlStrip";
 
@@ -26,6 +25,7 @@ export function Room() {
   const [incomingPhoto, setIncomingPhoto] = useState<PhotoReadyMessage | null>(null);
   const [holderParticipantId, setHolderParticipantId] = useState<string | null>(null);
   const [holderAway, setHolderAway] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   // Starts hidden — never flash the upload UI before we know it's actually enabled.
   const [photosEnabled, setPhotosEnabled] = useState(false);
 
@@ -149,45 +149,126 @@ export function Room() {
 
   if (status === "closed") {
     return (
-      <Centered>
-        <p>Sala encerrada{closedReason ? ` (${describeClosedReason(closedReason)})` : ""}.</p>
-        <button onClick={() => navigate("/")} style={primaryButtonStyle}>
-          Voltar ao início
-        </button>
-      </Centered>
+      <FullScreen>
+        <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 16, alignItems: "center" }}>
+          <p style={{ color: "var(--color-text-secondary)" }}>
+            Sala encerrada{closedReason ? ` (${describeClosedReason(closedReason)})` : ""}.
+          </p>
+          <button onClick={() => navigate("/")} className="btn-primary">
+            Voltar ao início
+          </button>
+        </div>
+      </FullScreen>
     );
   }
 
   return (
-    <Centered>
-      <h1 style={{ fontSize: "1.1rem", marginBottom: 4 }}>SyncRoom</h1>
-
-      {myRole === "host" && status === "waiting_peer" && (
-        <div style={{ fontSize: "0.85rem", opacity: 0.85, marginBottom: 12, textAlign: "center" }}>
-          <p>Compartilhe este link com a outra pessoa:</p>
-          <code style={{ background: "#161320", padding: "6px 10px", borderRadius: 8, display: "inline-block", marginTop: 4 }}>
-            {shareLink}
-          </code>
+    <FullScreen>
+      <div
+        style={{
+          position: "absolute",
+          top: 16,
+          left: 16,
+          right: 16,
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        <div style={{ fontSize: "0.8rem", color: "var(--color-text-secondary)", textAlign: "left" }}>
+          {myRole === "host" && status === "waiting_peer" && (
+            <>
+              <div>Compartilhe este link:</div>
+              <code
+                style={{
+                  background: "var(--color-surface)",
+                  border: "1px solid var(--color-border)",
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                  display: "inline-block",
+                  marginTop: 4,
+                  color: "var(--color-text)",
+                }}
+              >
+                {shareLink}
+              </code>
+            </>
+          )}
+          {status === "peer_disconnected" && <span style={{ color: "var(--color-accent)" }}>A outra pessoa desconectou...</span>}
+          {(status === "waiting_peer" || status === "connecting") && myRole === "guest" && <span>Conectando à sala...</span>}
         </div>
-      )}
 
-      {status === "peer_disconnected" && <p style={{ color: "#ffcf7a" }}>A outra pessoa desconectou. Aguardando reconexão...</p>}
-      {(status === "waiting_peer" || status === "connecting") && myRole === "guest" && <p>Conectando à sala...</p>}
+        <ReportEndButton onEnd={handleEnd} />
+      </div>
 
-      <SyncCanvas interpolator={interpolator} />
-      <ControlStrip
-        isHolder={isHolder}
-        statusLabel={controlStatusLabel}
-        showClaimButton={!isHolder}
-        onClaim={handleClaimControl}
-        onInput={handleControlInput}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 28,
+        }}
+      >
+        <SyncCanvas interpolator={interpolator} />
+        <ControlStrip
+          isHolder={isHolder}
+          statusLabel={controlStatusLabel}
+          showClaimButton={!isHolder}
+          onClaim={handleClaimControl}
+          onInput={handleControlInput}
+        />
+      </div>
+
+      <button
+        onClick={() => setChatOpen(true)}
+        aria-label="Abrir chat"
+        style={{
+          position: "fixed",
+          bottom: 20,
+          right: 20,
+          width: 48,
+          height: 48,
+          borderRadius: "50%",
+          border: "1px solid var(--color-border)",
+          background: "var(--color-surface)",
+          color: "var(--color-text)",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <ChatIcon />
+      </button>
+
+      <ChatDrawer
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        messages={messages}
+        myRole={myRole}
+        onSend={handleSendChat}
+        photosEnabled={photosEnabled}
+        roomId={roomId}
+        hostToken={hostToken}
+        incomingPhoto={incomingPhoto}
+        onViewedPhoto={handleViewedPhoto}
       />
-      <ChatPanel messages={messages} myRole={myRole} onSend={handleSendChat} />
-      {photosEnabled && (
-        <PhotoUpload roomId={roomId} hostToken={hostToken} incoming={incomingPhoto} onViewed={handleViewedPhoto} />
-      )}
-      <ReportEndButton onEnd={handleEnd} />
-    </Centered>
+    </FullScreen>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v10c0 .83-.67 1.5-1.5 1.5H9l-4 4v-4H5.5C4.67 17 4 16.33 4 15.5v-10Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -210,33 +291,22 @@ function describeClosedReason(reason: string): string {
   }
 }
 
-function Centered({ children }: { children: React.ReactNode }) {
+function FullScreen({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
+        position: "relative",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 14,
         padding: 16,
-        background: "#0b0b12",
-        color: "#f2f0f7",
-        textAlign: "center",
+        background: "var(--color-bg)",
+        color: "var(--color-text)",
       }}
     >
       {children}
     </div>
   );
 }
-
-const primaryButtonStyle: React.CSSProperties = {
-  padding: "10px 18px",
-  borderRadius: 8,
-  border: "none",
-  background: "#c9a4ff",
-  color: "#0b0b12",
-  fontWeight: 600,
-  cursor: "pointer",
-};
