@@ -1,30 +1,42 @@
 import type { SyncTick } from "@syncroom/shared";
 import { config } from "../config.js";
 
-const MAX_VALUE_DELTA_PER_INPUT = 0.25;
+const BASE_SPEED_HZ = 0.3; // neutral cadence with nobody in control
+const MIN_SPEED_HZ = 0.1;
+const MAX_SPEED_HZ = 1.5;
+const SPEED_SMOOTHING_PER_TICK = 0.12; // fraction of the gap closed each tick — tune by feel
 
 function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value));
 }
 
+function mapControlValueToSpeedHz(value: number): number {
+  return MIN_SPEED_HZ + clamp01(value) * (MAX_SPEED_HZ - MIN_SPEED_HZ);
+}
+
 /**
- * Server-authoritative sync state for a room. Normally relays whatever the
- * current control holder sends. While no one has claimed control yet (fresh
- * room, or right after the holder leaves for good), falls back to a
- * deterministic idle waveform so the room isn't visually "dead" before
- * anyone touches the control strip.
+ * Server-authoritative sync state for a room. The ball is *never*
+ * puppeteered directly — a continuous oscillator drives its position at all
+ * times, with or without a control holder. `control_input.value` only sets
+ * the oscillator's target speed; the actual speed eases toward that target
+ * over a handful of ticks, and phase always accumulates forward, so the
+ * ball's position never jumps when speed changes, only its cadence does.
  */
 export class SyncEngine {
-  private readonly startedAt = Date.now();
   private timer: NodeJS.Timeout | null = null;
+  private lastTickAt = Date.now();
+
+  private phase = 0; // radians, monotonically accumulated
+  private currentSpeedHz = BASE_SPEED_HZ;
 
   private controlHolder: string | null = null;
-  private controlValue = 0.5;
+  private controlValue = (BASE_SPEED_HZ - MIN_SPEED_HZ) / (MAX_SPEED_HZ - MIN_SPEED_HZ); // last raw slider value (0-1)
 
   constructor(private readonly onTick: (tick: SyncTick) => void) {}
 
   start(): void {
     if (this.timer) return;
+    this.lastTickAt = Date.now();
     const intervalMs = Math.round(1000 / config.syncTickHz);
     this.timer = setInterval(() => {
       const tick: SyncTick = { type: "sync", t: Date.now(), ...this.computeTick() };
@@ -46,37 +58,37 @@ export class SyncEngine {
   /** Anyone can claim control at any time — no permission negotiation in the MVP. */
   setControlHolder(participantId: string | null): void {
     this.controlHolder = participantId;
+    // Deliberately don't touch controlValue/currentSpeedHz/phase — a handoff
+    // (or a reconnect) never resets the oscillator, it just changes who's
+    // allowed to steer its target speed next.
   }
 
   /**
-   * Relays a control input, but only from the current holder — anything
-   * else is silently ignored rather than erroring. Clamps both the value
-   * itself and the max change per input, so a slipped finger or a malformed
-   * client can't make the ball jump instantly across the whole range.
+   * Sets the target speed via a 0-1 slider value, but only from the current
+   * holder — anything else is silently ignored rather than erroring. This
+   * never touches position directly; computeTick's smoothing is what makes
+   * the transition gradual.
    */
   submitInput(participantId: string, rawValue: number): void {
     if (participantId !== this.controlHolder) return;
     if (typeof rawValue !== "number" || !Number.isFinite(rawValue)) return;
-
-    const target = clamp01(rawValue);
-    const delta = target - this.controlValue;
-    const limitedDelta = Math.sign(delta) * Math.min(Math.abs(delta), MAX_VALUE_DELTA_PER_INPUT);
-    this.controlValue = clamp01(this.controlValue + limitedDelta);
+    this.controlValue = clamp01(rawValue);
   }
 
   private computeTick(): Omit<SyncTick, "type" | "t"> {
-    if (this.controlHolder) {
-      // Frozen at the last relayed value whenever the holder stops sending
-      // input (e.g. they disconnected) — no extra "freeze" logic needed.
-      return { x: this.controlValue, speed: 0.5, pattern: "controlled" };
-    }
-    return { ...idleWave(this.startedAt), speed: 0.5, pattern: "sine-default" };
-  }
-}
+    const now = Date.now();
+    const dt = Math.min((now - this.lastTickAt) / 1000, 1 / 10); // clamp so a stall doesn't fling the phase
+    this.lastTickAt = now;
 
-function idleWave(startedAt: number): { x: number } {
-  const elapsedSec = (Date.now() - startedAt) / 1000;
-  const periodSec = 6;
-  const phase = (elapsedSec % periodSec) / periodSec;
-  return { x: (Math.sin(phase * Math.PI * 2) + 1) / 2 };
+    const targetSpeedHz = this.controlHolder ? mapControlValueToSpeedHz(this.controlValue) : BASE_SPEED_HZ;
+    this.currentSpeedHz += (targetSpeedHz - this.currentSpeedHz) * SPEED_SMOOTHING_PER_TICK;
+
+    this.phase += 2 * Math.PI * this.currentSpeedHz * dt;
+    if (this.phase > Math.PI * 2) this.phase -= Math.PI * 2 * Math.floor(this.phase / (Math.PI * 2));
+
+    const x = (Math.sin(this.phase) + 1) / 2;
+    const speed = clamp01((this.currentSpeedHz - MIN_SPEED_HZ) / (MAX_SPEED_HZ - MIN_SPEED_HZ));
+    const pattern = this.controlHolder ? "controlled" : "sine-default";
+    return { x, speed, pattern };
+  }
 }

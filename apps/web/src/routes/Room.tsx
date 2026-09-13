@@ -142,10 +142,10 @@ export function Room() {
   const controlStatusLabel = holderAway
     ? "Aguardando a outra pessoa reconectar..."
     : isHolder
-      ? "Você está no controle"
+      ? "Você está ajustando o ritmo. O movimento acontece sozinho."
       : holderParticipantId
-        ? "A outra pessoa está no controle"
-        : "Ninguém no controle — toque para assumir";
+        ? "A outra pessoa está ajustando o ritmo"
+        : "Ninguém ajustando o ritmo — toque para assumir";
 
   if (status === "closed") {
     return (

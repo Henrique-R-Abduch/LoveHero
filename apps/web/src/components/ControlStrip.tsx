@@ -58,6 +58,16 @@ export function ControlStrip({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+      <span
+        style={{
+          fontSize: "0.7rem",
+          fontWeight: 600,
+          letterSpacing: "0.02em",
+          color: "var(--color-text-secondary)",
+        }}
+      >
+        Velocidade
+      </span>
       <div
         ref={stripRef}
         onPointerDown={handlePointerDown}

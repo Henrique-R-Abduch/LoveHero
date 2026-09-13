@@ -9,8 +9,22 @@ function hexToRgb(hex: string): string {
 }
 
 const ACCENT_RGB = hexToRgb(tokens.accent);
+const IDLE_BREATH_HZ = 0.12; // slower than the room's own neutral 0.3Hz — a calmer, "breathing" cadence
 
-export function SyncCanvas({ interpolator }: { interpolator: TickInterpolator }) {
+/**
+ * Same orb used in the room, in two modes:
+ * - live (default): driven by a TickInterpolator fed from the server.
+ * - idle: no server connection at all (used as the landing page's hero) —
+ *   a local, low-intensity breathing animation. Same rendering, same
+ *   physics, just a gentler standalone motion instead of live sync data.
+ */
+export function SyncCanvas({
+  interpolator,
+  idle = false,
+}: {
+  interpolator?: TickInterpolator;
+  idle?: boolean;
+}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -38,6 +52,7 @@ export function SyncCanvas({ interpolator }: { interpolator: TickInterpolator })
     const ballSpring = new Spring(0.5);
     const glowSpring = new Spring(0.5);
     let smoothedSpeed = 0.5;
+    let idlePhase = 0;
     let lastTime: number | null = null;
     let frame = requestAnimationFrame(draw);
 
@@ -49,9 +64,17 @@ export function SyncCanvas({ interpolator }: { interpolator: TickInterpolator })
       const { width, height } = canvas;
       ctx.clearRect(0, 0, width, height);
 
-      const sample = interpolator.sample();
-      const target = sample?.x ?? 0.5;
-      const targetSpeed = sample?.speed ?? 0.5;
+      let target: number;
+      let targetSpeed: number;
+      if (idle) {
+        idlePhase += 2 * Math.PI * IDLE_BREATH_HZ * dt;
+        target = (Math.sin(idlePhase) + 1) / 2;
+        targetSpeed = 0; // no scale pulse in idle — it's a calm resting state, not "fast"
+      } else {
+        const sample = interpolator?.sample() ?? null;
+        target = sample?.x ?? 0.5;
+        targetSpeed = sample?.speed ?? 0.5;
+      }
 
       let ballX = target;
       let glowX = target;
@@ -83,6 +106,7 @@ export function SyncCanvas({ interpolator }: { interpolator: TickInterpolator })
 
       if (!reducedMotion) {
         const glowRadius = ballRadius * 3.4;
+        const glowAlpha = idle ? 0.18 : 0.35; // "baixa intensidade" for the idle hero
         const gradient = ctx.createRadialGradient(
           toPixelX(glowX),
           trackY,
@@ -91,7 +115,7 @@ export function SyncCanvas({ interpolator }: { interpolator: TickInterpolator })
           trackY,
           glowRadius,
         );
-        gradient.addColorStop(0, `rgba(${ACCENT_RGB}, 0.35)`);
+        gradient.addColorStop(0, `rgba(${ACCENT_RGB}, ${glowAlpha})`);
         gradient.addColorStop(1, `rgba(${ACCENT_RGB}, 0)`);
         ctx.fillStyle = gradient;
         ctx.beginPath();
@@ -112,7 +136,7 @@ export function SyncCanvas({ interpolator }: { interpolator: TickInterpolator })
       window.removeEventListener("resize", resize);
       reducedMotionQuery.removeEventListener("change", onMotionChange);
     };
-  }, [interpolator]);
+  }, [interpolator, idle]);
 
   return (
     <canvas

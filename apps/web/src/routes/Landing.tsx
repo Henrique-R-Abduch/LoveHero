@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createRoom } from "../lib/api";
+import { SyncCanvas } from "../components/SyncCanvas";
 
 export function Landing() {
   const navigate = useNavigate();
@@ -25,47 +26,42 @@ export function Landing() {
       style={{
         minHeight: "100vh",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        gap: 28,
         padding: 16,
         background: "var(--color-bg)",
+        textAlign: "center",
       }}
     >
-      <div
+      <SyncCanvas idle />
+
+      <h1
         style={{
-          width: "100%",
-          maxWidth: 380,
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: 20,
-          padding: "40px 32px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 16,
-          textAlign: "center",
+          fontSize: "1.4rem",
+          fontWeight: 700,
+          color: "var(--color-text)",
+          margin: 0,
+          maxWidth: 320,
         }}
       >
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--color-text)", margin: 0 }}>
-          Criar uma sala privada
-        </h1>
-        <p style={{ maxWidth: 300, color: "var(--color-text-secondary)", fontSize: "0.9rem", lineHeight: 1.5, margin: 0 }}>
-          Compartilhe o link com a outra pessoa e fiquem sincronizados em tempo real. Sem cadastro — a sala expira
-          sozinha.
-        </p>
-        <button
-          className="btn-primary"
-          onClick={handleCreate}
-          disabled={loading}
-          style={{ width: "100%", fontSize: "1rem", opacity: loading ? 0.7 : 1 }}
-        >
-          {loading ? "Criando..." : "Criar sala"}
-        </button>
-        {error && <span style={{ color: "var(--color-accent)", fontSize: "0.85rem" }}>{error}</span>}
-        <a href="/terms" style={{ color: "var(--color-text-secondary)", fontSize: "0.8rem" }}>
-          Termos de uso
-        </a>
-      </div>
+        Um espaço sincronizado, só para vocês dois
+      </h1>
+
+      <button className="btn-primary" onClick={handleCreate} disabled={loading} style={{ minWidth: 200, opacity: loading ? 0.7 : 1 }}>
+        {loading ? "Criando..." : "Criar sala"}
+      </button>
+
+      {error && <span style={{ color: "var(--color-accent)", fontSize: "0.85rem" }}>{error}</span>}
+
+      <p style={{ color: "var(--color-text-secondary)", fontSize: "0.85rem", margin: 0 }}>
+        Sem conta. Sem histórico. A sala se apaga sozinha.
+      </p>
+
+      <a href="/terms" style={{ color: "var(--color-text-secondary)", fontSize: "0.78rem" }}>
+        Termos de uso
+      </a>
     </div>
   );
 }

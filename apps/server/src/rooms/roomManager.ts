@@ -118,6 +118,14 @@ export async function joinRoom(
   const history = await roomStore.getChatHistory(roomId);
   send(socket, { type: "chat_history", messages: history });
 
+  const currentHolder = room.syncEngine.getControlHolder();
+  if (currentHolder) {
+    // Snapshot for whoever's joining now — control_state is otherwise only
+    // broadcast on change, which a late joiner (or one who reconnects after
+    // a claim happened while they were gone) would never have seen.
+    send(socket, { type: "control_state", holderParticipantId: currentHolder });
+  }
+
   if (wasReconnect) {
     broadcast(room, { type: "peer_reconnected", t: Date.now() });
   }
