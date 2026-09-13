@@ -5,10 +5,9 @@ import { RoomSocket } from "../lib/websocket";
 import { TickInterpolator } from "../lib/interpolation";
 import { getParticipantId } from "../lib/participant";
 import { getConfig } from "../lib/api";
-import { SyncCanvas } from "../components/SyncCanvas";
 import { ChatDrawer } from "../components/ChatDrawer";
 import { ReportEndButton } from "../components/ReportEndButton";
-import { ControlStrip } from "../components/ControlStrip";
+import { RhythmExperience } from "../components/rhythm/RhythmExperience";
 
 type Status = "connecting" | "waiting_peer" | "ready" | "peer_disconnected" | "closed";
 
@@ -139,13 +138,7 @@ export function Room() {
   };
 
   const isHolder = holderParticipantId === participantId;
-  const controlStatusLabel = holderAway
-    ? "Aguardando a outra pessoa reconectar..."
-    : isHolder
-      ? "Você está ajustando o ritmo. O movimento acontece sozinho."
-      : holderParticipantId
-        ? "A outra pessoa está ajustando o ritmo"
-        : "Ninguém ajustando o ritmo — toque para assumir";
+  const hasHolder = holderParticipantId !== null;
 
   if (status === "closed") {
     return (
@@ -202,24 +195,14 @@ export function Room() {
         <ReportEndButton onEnd={handleEnd} />
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 28,
-        }}
-      >
-        <SyncCanvas interpolator={interpolator} />
-        <ControlStrip
-          isHolder={isHolder}
-          statusLabel={controlStatusLabel}
-          showClaimButton={!isHolder}
-          onClaim={handleClaimControl}
-          onInput={handleControlInput}
-        />
-      </div>
+      <RhythmExperience
+        interpolator={interpolator}
+        isHolder={isHolder}
+        holderAway={holderAway}
+        hasHolder={hasHolder}
+        onClaim={handleClaimControl}
+        onInput={handleControlInput}
+      />
 
       <button
         onClick={() => setChatOpen(true)}
@@ -302,7 +285,10 @@ function FullScreen({ children }: { children: React.ReactNode }) {
         alignItems: "center",
         justifyContent: "center",
         padding: 16,
-        background: "var(--color-bg)",
+        background:
+          "radial-gradient(circle at 50% 35%, rgba(var(--color-wine-rgb), 0.09), transparent 40%), " +
+          "radial-gradient(circle at 50% 70%, rgba(var(--color-accent-rgb), 0.025), transparent 45%), " +
+          "var(--color-bg)",
         color: "var(--color-text)",
       }}
     >

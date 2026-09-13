@@ -12,4 +12,17 @@
   --color-surface-raised: color-mix(in srgb, #ffffff 10%, var(--color-bg));
   --color-border: color-mix(in srgb, #ffffff 14%, var(--color-bg));
   --color-accent-soft: color-mix(in srgb, var(--color-accent) 16%, transparent);
+
+  /* RGB triples (no leading "rgb(...)") so rgba(var(--x-rgb), alpha) works
+     with an arbitrary alpha at the call site. */
+  --color-accent-rgb: 255, 59, 48;
+
+  /* Deep wine tones for the rhythm experience — a quieter, more intimate
+     accompaniment to the accent red, used for the track gradient and the
+     center pulse marker's resting core. Not derived via color-mix because
+     they're a genuinely different hue, not a tint/shade of the accent. */
+  --color-wine: #73232f;
+  --color-wine-rgb: 115, 35, 47;
+  --color-wine-deep: #4a101d;
+  --color-wine-deep-rgb: 74, 16, 29;
 }

@@ -1,0 +1,377 @@
+/* ---- container ---- */
+
+.rhythm-card {
+  position: relative;
+  width: 100%;
+  max-width: clamp(360px, 92vw, 800px);
+  padding: clamp(24px, 5vw, 56px);
+  background: rgba(18, 13, 16, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 28px;
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.55),
+    0 12px 35px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(20px, 3vw, 28px);
+  text-align: center;
+}
+
+.rhythm-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(var(--color-accent-rgb), 0.8);
+  margin: 0;
+}
+
+.rhythm-title {
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  margin: 0;
+  max-width: 20ch;
+}
+
+.rhythm-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  max-width: 30em;
+  margin: -8px 0 0;
+}
+
+/* ---- stage (track + orbs) ---- */
+
+.rhythm-stage {
+  position: relative;
+  width: 100%;
+  height: clamp(140px, 20vw, 210px);
+  --rhythm-inset: 30px;
+}
+
+.rhythm-track-line {
+  position: absolute;
+  left: var(--rhythm-inset);
+  right: var(--rhythm-inset);
+  top: 50%;
+  height: 2px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.02),
+    rgba(var(--color-wine-rgb), 0.25),
+    rgba(var(--color-accent-rgb), 0.22),
+    rgba(var(--color-wine-rgb), 0.25),
+    rgba(255, 255, 255, 0.02)
+  );
+}
+
+.rhythm-track-line__blur {
+  position: absolute;
+  left: var(--rhythm-inset);
+  right: var(--rhythm-inset);
+  top: 50%;
+  height: 6px;
+  transform: translateY(-50%);
+  filter: blur(6px);
+  opacity: 0.5;
+  background: inherit;
+}
+
+.rhythm-end-marker {
+  position: absolute;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+}
+
+.rhythm-end-marker--left {
+  left: var(--rhythm-inset);
+}
+
+.rhythm-end-marker--right {
+  left: calc(100% - var(--rhythm-inset));
+}
+
+.rhythm-center-marker {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+}
+
+.rhythm-center-marker__ring {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.5);
+  opacity: 0;
+}
+
+.rhythm-center-marker__core {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-wine-deep);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.1);
+}
+
+/*
+ * Each moving thing is a zero-size "-pos" anchor (JS sets translateX on it
+ * every frame) wrapping a statically-styled child (vertical centering +
+ * any CSS/WAAPI transform animation lives on the child instead). This
+ * keeps the per-frame imperative position update and any transform
+ * animation (breathing, pulses) from fighting over the same element's
+ * `transform` property.
+ */
+.rhythm-orb-glow-far-pos,
+.rhythm-orb-glow-near-pos,
+.rhythm-orb-pos {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.rhythm-orb-glow-far,
+.rhythm-orb-glow-near {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.rhythm-orb-glow-far {
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(var(--color-accent-rgb), 0.06), transparent 70%);
+  filter: blur(35px);
+}
+
+.rhythm-orb-glow-near {
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(circle, rgba(var(--color-accent-rgb), 0.2), transparent 70%);
+  filter: blur(12px);
+  animation: rhythm-breathe 5s ease-in-out infinite;
+}
+
+.rhythm-orb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: clamp(40px, 8vw, 52px);
+  height: clamp(40px, 8vw, 52px);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 30%, #ff6a58 0%, #eb493a 40%, #c92e32 100%);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.38),
+    0 0 22px rgba(var(--color-accent-rgb), 0.2),
+    0 0 55px rgba(var(--color-accent-rgb), 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+/* ---- value + label ---- */
+
+.rhythm-value {
+  font-size: clamp(30px, 5vw, 38px);
+  font-weight: 600;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+  transition: opacity 160ms ease;
+}
+
+.rhythm-value-label {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: -12px 0 0;
+}
+
+.rhythm-holder-status {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.rhythm-holder-status button {
+  font: inherit;
+  color: rgba(var(--color-accent-rgb), 0.9);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---- slider ---- */
+
+.rhythm-slider-block {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rhythm-slider-root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 22px;
+  touch-action: none;
+}
+
+.rhythm-slider-root[data-disabled] {
+  opacity: 0.45;
+}
+
+.rhythm-slider-track {
+  position: relative;
+  flex-grow: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.rhythm-slider-range {
+  position: absolute;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7a1c2c, var(--color-accent));
+  box-shadow: 0 0 8px rgba(var(--color-accent-rgb), 0.25);
+}
+
+.rhythm-slider-thumb {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f05a48;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    0 0 15px rgba(var(--color-accent-rgb), 0.18);
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 160ms ease;
+  cursor: grab;
+}
+
+.rhythm-slider-thumb:hover {
+  transform: scale(1.08);
+}
+
+.rhythm-slider-thumb:active {
+  transform: scale(0.94);
+  cursor: grabbing;
+}
+
+.rhythm-slider-thumb:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(var(--color-accent-rgb), 0.35),
+    0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+.rhythm-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(245, 241, 242, 0.38);
+}
+
+.rhythm-footer {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ---- entrance ---- */
+
+.rhythm-enter {
+  animation: rhythm-fade-up 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rhythm-enter-stage {
+  animation: rhythm-fade-scale 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---- keyframes ---- */
+
+@keyframes rhythm-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: translate(-50%, -50%) scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+}
+
+@keyframes rhythm-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rhythm-fade-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---- reduced motion ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .rhythm-orb-glow-near {
+    animation: none;
+  }
+  .rhythm-enter,
+  .rhythm-enter-stage {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
